@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Disa Web App</title>
+  <style>
+    body { font-family: sans-serif; padding: 2em; max-width: 600px; margin: auto; }
+    input, button, select { width: 100%; padding: 10px; margin: 10px 0; }
+    .hidden { display: none; }
+    .chat-box { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
+    #chatSuccess { background: #e0ffe0; padding: 10px; margin: 10px 0; border: 1px solid green; }
+    .mic-button { width: auto; padding: 10px 20px; background: #007bff; color: white; border: none; margin-left: 5px; }
+    .mic-button.recording { background-color: red; }
+  </style>
+</head>
+<body>
+  
+  <div id="loginForm">
+      <h2>Disa Login</h2>
+    <input type="text" id="mobileNumber" placeholder="Mobile Number" />
+    <input type="password" id="password" placeholder="Password" />
+    <button onclick="handleLogin()">Sign In</button>
+    <div id="loginStatus"></div>
+  </div>
+
+  <div id="mainApp" class="hidden">
+    <h2>Welcome to Disa</h2>
+
+    <div id="chatCreationForm">
+      <h4>Create New Chat</h4>
+      <select id="skillSelector"></select>
+      <input type="text" id="chatName" placeholder="Chat Name" />
+      <input type="text" id="chatInfo" placeholder="Additional Info (optional)" />
+      <button onclick="createChat()">Create Chat</button>
+    </div>
+    
+    <div id="chatSuccess" class="hidden"></div>
+
+    <div id="chatWindow" class="hidden">
+      <h4>Chat Messages</h4>
+      <div id="messagesBox" style="border: 1px solid #ccc; padding: 10px; height: 300px; overflow-y: scroll;"></div>
+      <div style="display: flex; align-items: center;">
+        <input type="text" id="newMessage" placeholder="Type your message..." style="flex: 1;" />
+        <button class="mic-button" id="micBtn" onclick="toggleMic()">🎤</button>
+      </div>
+      <button onclick="sendMessage()">Send</button>
+      
+      <button onclick="analyzeChat()">Analyze Chat</button>
+
+      <div id="analysisResult" class="hidden" style="border: 1px solid #ccc; padding: 10px; margin-top: 20px;">
+        <h4>Analysis Result</h4>
+        <pre id="analysisOutput" style="white-space: pre-wrap;"></pre>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const apiBase = "https://mtrytz6yai.execute-api.eu-north-1.amazonaws.com";
+  let token = "";
+  let templates = [];
+  let currentChatId = null;
+
+  async function handleLogin() {
+    const mobile = document.getElementById("mobileNumber").value;
+    const password = document.getElementById("password").value;
+
+    const formData = new URLSearchParams();
+    formData.append("grant_type", "password");
+    formData.append("username", mobile);
+    formData.append("password", password);
+    formData.append("scope", "");
+    formData.append("client_id", "string");
+    formData.append("client_secret", "string");
+
+    try {
+      const res = await fetch(`${apiBase}/signin`, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: formData.toString()
+      });
+
+      if (!res.ok) throw new Error("Login failed");
+
+      const data = await res.json();
+      token = data.access_token;
+
+      await loadTemplates();
+      showMainApp();
+    } catch (err) {
+      document.getElementById("loginStatus").innerText = "Login failed. Try again.";
+    }
+  }
+
+  async function loadTemplates() {
+    const res = await fetch(`${apiBase}/templates`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json"
+      }
+    });
+
+    templates = await res.json();
+
+    const dropdown = document.getElementById("skillSelector");
+    dropdown.innerHTML = templates.map(t =>
+      `<option value="${t.industry} - ${t.specialization}" data-welcome="${encodeURIComponent(t.checklist)}">
+         ${t.industry} - ${t.specialization}
+       </option>`).join("");
+  }
+
+  function showMainApp() {
+    document.getElementById("loginForm").style.display = "none";
+    document.getElementById("mainApp").classList.remove("hidden");
+  }
+
+  async function createChat() {
+    const chatName = document.getElementById("chatName").value;
+    const chatInfo = document.getElementById("chatInfo").value;
+    const templateIdStr = document.getElementById("skillSelector").value;
+    const welcomeMsg = decodeURIComponent(document.getElementById("skillSelector")
+      .selectedOptions[0].getAttribute("data-welcome"));
+
+    const formData = new FormData();
+    formData.append("name", chatName);
+    formData.append("description", chatInfo);
+    formData.append("welcome_message", welcomeMsg || "Welcome to the chat!");
+    formData.append("templates_id", templateIdStr);
+    formData.append("image", ""); // optional empty
+
+    try {
+      const res = await fetch(`${apiBase}/chats`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData
+      });
+
+      const result = await res.json();
+
+      if (result.chat_id) {
+        currentChatId = result.chat_id;
+        document.getElementById("chatSuccess").innerText =
+          `✅ Chat created! Chat ID: ${currentChatId}`;
+        document.getElementById("chatSuccess").classList.remove("hidden");
+        
+        // Hide the chat creation form
+        document.getElementById("chatCreationForm").style.display = "none";
+        
+        // Show success message briefly
+        setTimeout(() => {
+          document.getElementById("chatSuccess").classList.add("hidden");
+        }, 3000);
+
+        fetchMessages(currentChatId);
+      } else {
+        alert("Chat creation failed.");
+      }
+    } catch (error) {
+      alert("Error creating chat.");
+    }
+  }
+
+  async function fetchMessages(chatId) {
+    const res = await fetch(`${apiBase}/chats/${chatId}/messages`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    const messages = await res.json();
+    const box = document.getElementById("messagesBox");
+    box.innerHTML = messages.length
+      ? messages.map(msg => `
+        <div style="margin-bottom: 10px;">
+          <b>${msg.sender_name}:</b><br />
+          ${msg.message}<br />
+        </div>
+      `).join("")
+      : "<i>No messages yet</i>";
+
+    document.getElementById("chatWindow").classList.remove("hidden");
+    box.scrollTop = box.scrollHeight;
+  }
+
+  async function sendMessage() {
+    const text = document.getElementById("newMessage").value;
+    if (!text || !currentChatId) return;
+
+    const res = await fetch(`${apiBase}/chats/${currentChatId}/send-message`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ message: text })
+    });
+
+    if (res.ok) {
+      document.getElementById("newMessage").value = "";
+      fetchMessages(currentChatId);
+    } else {
+      alert("Message failed to send.");
+    }
+  }
+
+  // Speech-to-text
+  let recognition;
+  let isRecording = false;
+  let fullTranscript = "";
+
+  if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
+    window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new window.SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+    
+    recognition.onresult = (event) => {
+      let interim = "";
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          fullTranscript += transcript + " ";
+        } else {
+          interim += transcript;
+        }
+      }
+      const input = document.getElementById("newMessage");
+      input.value = fullTranscript + interim;
+      input.scrollLeft = input.scrollWidth;  // Keep scrolled to right
+    };
+
+    recognition.onerror = (event) => {
+      console.error("Speech recognition error:", event.error);
+    };
+
+    recognition.onend = () => {
+      document.getElementById("micBtn").classList.remove("recording");
+      isRecording = false;
+    };
+  }
+
+  function toggleMic() {
+    if (!recognition) {
+      alert("Speech Recognition not supported in this browser.");
+      return;
+    }
+
+    if (!isRecording) {
+      fullTranscript = document.getElementById("newMessage").value + " ";
+      recognition.start();
+      document.getElementById("micBtn").classList.add("recording");
+      isRecording = true;
+    } else {
+      recognition.stop();
+    }
+  }
+  
+  async function analyzeChat() {
+  if (!currentChatId || !token) return alert("No chat selected or not logged in.");
+
+  const loader = document.getElementById("loader");
+  loader.classList.remove("hidden");
+
+  try {
+    // Step 1: Fetch chat messages
+    const res = await fetch(`${apiBase}/chats/${currentChatId}/messages`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    const messages = await res.json();
+    if (!messages.length) {
+      loader.classList.add("hidden");
+      return alert("No messages to analyze.");
+    }
+
+    // Step 2: Format messages
+    const formattedText = messages
+      .map(m => `${m.sent_at} - ${m.sender_name}: ${m.message}`)
+      .join("\n");
+
+    // Step 3: Get template_text
+    const templateRes = await fetch(`${apiBase}/templates`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json"
+      }
+    });
+    const templates = await templateRes.json();
+    const templateText = templates[0]?.template_text || "";
+
+    // Step 4: Send to OpenAI endpoint
+    const openaiRes = await fetch(`${apiBase}/openai/chat`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        message: `${templateText}\n${formattedText}`
+      })
+    });
+
+    if (!openaiRes.ok) throw new Error("Failed to get analysis");
+
+    const result = await openaiRes.json();
+    const output = result.content || "";
+
+    // Step 5: Show locally and send to parent if valid
+    document.getElementById("analysisResult").classList.remove("hidden");
+    document.getElementById("analysisOutput").textContent = output;
+
+    if (output.trim()) {
+      const jsonResult = JSON.parse(output);
+      window.parent.postMessage({ type: 'analysisResult', payload: jsonResult }, '*');
+
+      // Close popup and redirect
+      setTimeout(() => {
+        window.location.href = "index.html";
+      }, 1000); // give parent time to receive message
+    } else {
+      alert("Analysis returned empty. Please try again.");
+    }
+  } catch (error) {
+    console.error(error);
+    alert("Analysis failed.");
+  } finally {
+    loader.classList.add("hidden");
+  }
+}
+
+</script>
+
+<div id="loader" class="hidden" style="text-align:center; margin-top:20px;">
+  <strong>Analyzing... Please wait.</strong>
+</div>
+
+
+</body>
+</html>

@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pranaam Hospitals EMR System</title>
+    <style>
+        html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f8f8f8;
+}
+
+.container {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    border: none;
+    background-color: white;
+    box-shadow: none;
+}
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo {
+            color: #993333;
+            font-weight: bold;
+            font-size: 24px;
+            margin-right: 20px;
+        }
+        
+        .since {
+            color: #993333;
+            font-size: 12px;
+            margin-top: -15px;
+            margin-left: 55px;
+        }
+        
+        .toggle-sidebar {
+            background-color: #993333;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        
+        .nav {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        .nav a {
+            color: #003366;
+            text-decoration: none;
+        }
+        
+        .patient-info {
+            padding: 20px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            flex-wrap: wrap;
+        }
+        
+        .doctor-info, .patient-details {
+            display: flex;
+            align-items: center;
+            width: 50%;
+            margin-bottom: 15px;
+        }
+        
+        .circle-icon {
+            width: 40px;
+            height: 40px;
+            background-color: #eeffee;
+            border: 1px solid #88aa88;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+        }
+        
+        .name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .view-prescription {
+            color: #993333;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        
+        .patient-meta {
+            width: 100%;
+            display: flex;
+            justify-content: flex-end;
+            font-size: 14px;
+        }
+        
+        .action-buttons {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+}
+
+.left-buttons,
+.right-button {
+    display: flex;
+    gap: 5px;
+}
+
+        
+        .btn {
+            background-color: #003366;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .tab {
+            padding: 10px 15px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .tab.active {
+            background-color: #003366;
+            color: white;
+        }
+        
+        .tab-content {
+            padding: 20px;
+        }
+        
+        .search-row {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .input-field {
+            flex-grow: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+        }
+        
+        .dropdown {
+            width: 250px;
+            padding: 8px;
+            border: 1px solid #ddd;
+        }
+        
+        .add-btn {
+            background-color: #003366;
+            color: white;
+            border: none;
+            width: 30px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        
+        .investigation-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .investigation-table th {
+            background-color: #003366;
+            color: white;
+            text-align: left;
+            padding: 10px;
+        }
+        
+        .investigation-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
+        
+        .delete-icon {
+            width: 20px;
+            height: 20px;
+            background-color: #ff6666;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo-container">
+                <div>
+                    <div class="logo">Pranaam Hospitals</div>
+                    
+                </div>
+                <button class="toggle-sidebar">Toggle Sidebar</button>
+            </div>
+            <div class="nav">
+                <a href="#">PRANAAM HOSPITAL</a>
+                <a href="#">ADMINISTRATOR 03/05/2025 12:03</a>
+                <a href="#">Consultation</a>
+                <a href="#">Home</a>
+                <a href="#">Log Out</a>
+            </div>
+        </div>
+        
+        <div class="patient-info">
+            <div class="doctor-info">
+                <div class="circle-icon">DR</div>
+                <div>
+                    <div class="name">Dr. RAVI GURRAM</div>
+                    <a href="#" class="view-prescription">View Prescription</a>
+                </div>
+            </div>
+            
+            <div class="patient-details">
+                <div class="circle-icon">PT</div>
+                <div>
+                    <div class="name">HARISH KUMAR BATCHU</div>
+                    <div>Fee: 300.00/Half By:</div>
+                </div>
+            </div>
+            
+            <div class="patient-meta">
+                <div>
+                    <div>29 Years, Male &nbsp;&nbsp;&nbsp; MR2500000915</div>
+                    <div>PHS-OC24 (02/01/2025 03/2025) 12:02</div>
+                    <div>Remarks:</div>
+                </div>
+            </div>
+        </div>
+        
+        
+       <div class="action-buttons">
+    <div class="left-buttons">
+        <button class="btn">Save</button>
+        <button class="btn">Close Visit</button>
+        <button class="btn">Back</button>
+    </div>
+    <div class="right-button">
+        <button class="btn" id="analysisBtn">Analysis ✨</button>
+    </div>
+</div>
+
+        <hr>
+        
+        <div class="tabs">
+            <div class="tab">VITALS</div>
+            <div class="tab">HISTORY</div>
+            <div class="tab">CURRENT MEDICATION</div>
+            <div class="tab active">INVESTIGATION ADVISE</div>
+            <div class="tab">DIAGNOSIS</div>
+            <div class="tab">TREATMENT PLAN</div>
+            <div class="tab">ADMISSION ADVISE</div>
+            <div class="tab">REVIEW VISIT</div>
+            <div class="tab">SURGERY ADVISE</div>
+        </div>
+        
+        <div class="tab-content">
+            <div class="search-row">
+                <input type="text" class="input-field" placeholder="Investigation Name">
+                <button class="add-btn">+</button>
+                <select class="dropdown">
+                    <option>Choose Investigation Template</option>
+                </select>
+            </div>
+            
+            <table class="investigation-table">
+                <thead>
+                    <tr>
+                        <th width="50"></th>
+                        <th>Investigation Name</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <div class="delete-icon">×</div>
+                        </td>
+                        <td>Lipid profile</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="delete-icon">×</div>
+                        </td>
+                        <td>Fasting blood sugar</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="delete-icon">×</div>
+                        </td>
+                        <td>Complete blood picture</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            
+            <br>
+            <table class="investigation-table">
+                <thead>
+                    <tr>
+                        <th width="50"></th>
+                        <th>Investigation Analysis Result (by Disa)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                           
+                        </td>
+                        <td id="analysisResultDisplay">
+                            <pre style="white-space: pre-wrap; font-size: 12px;">
+Disa Output Here...
+                            </pre>
+                        </td>
+                    </tr>
+                    
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Add event listeners for the buttons
+        document.querySelector('.toggle-sidebar').addEventListener('click', function() {
+            alert('Toggle Sidebar clicked');
+        });
+        
+        document.querySelector('#analysisBtn').addEventListener('click', function() {
+            document.getElementById('disaModal').style.display = 'flex';
+        });
+
+        function closeDisaModal() {
+            document.getElementById('disaModal').style.display = 'none';
+        }
+
+        // Add window event listener for messages from iframe (popup.html)
+        window.addEventListener('message', function(event) {
+            console.log('Message received:', event.data);
+            
+            // Check if this is the analysis result
+            if (event.data && event.data.type === 'analysisResult') {
+                console.log('Analysis result received', event.data.payload);
+                
+                // Update the analysis result pre element with the JSON data
+                const resultContainer = document.getElementById('analysisResultDisplay').querySelector('pre');
+                resultContainer.textContent = JSON.stringify(event.data.payload, null, 2);
+                
+                // Close the modal after displaying the result
+                closeDisaModal();
+            }
+        });
+
+        // Save, Close Visit, Back button events
+        const buttons = document.querySelectorAll('.btn');
+        buttons.forEach(button => {
+            if (button.id !== 'analysisBtn') {
+                button.addEventListener('click', function() {
+                    alert(button.textContent + ' button clicked');
+                });
+            }
+        });
+        
+        // Tab switching
+        const tabs = document.querySelectorAll('.tab');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Remove active class from all tabs
+                tabs.forEach(t => t.classList.remove('active'));
+                // Add active class to clicked tab
+                this.classList.add('active');
+                alert('Switched to ' + this.textContent + ' tab');
+            });
+        });
+        
+        // Delete investigation row
+        const deleteIcons = document.querySelectorAll('.delete-icon');
+        deleteIcons.forEach(icon => {
+            icon.addEventListener('click', function() {
+                const row = this.closest('tr');
+                if (confirm('Are you sure you want to remove this investigation?')) {
+                    row.remove();
+                }
+            });
+        });
+        
+        // Add new investigation
+        const addBtn = document.querySelector('.add-btn');
+        addBtn.addEventListener('click', function() {
+            const input = document.querySelector('.input-field');
+            const investigationName = input.value.trim();
+            
+            if (investigationName !== '') {
+                const tbody = document.querySelector('.investigation-table tbody');
+                const newRow = document.createElement('tr');
+                newRow.innerHTML = `
+                    <td>
+                        <div class="delete-icon">×</div>
+                    </td>
+                    <td>${investigationName}</td>
+                `;
+                
+                tbody.appendChild(newRow);
+                
+                // Add event listener to new delete icon
+                const newDeleteIcon = newRow.querySelector('.delete-icon');
+                newDeleteIcon.addEventListener('click', function() {
+                    if (confirm('Are you sure you want to remove this investigation?')) {
+                        newRow.remove();
+                    }
+                });
+                
+                // Clear input
+                input.value = '';
+            } else {
+                alert('Please enter an investigation name');
+            }
+        });
+    </script>
+    
+    <!-- Disa Popup Modal -->
+    <div id="disaModal" style="display: none; position: fixed; top: 0; left: 0;
+      width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; justify-content: center; align-items: center;">
+      <div style="background: white; padding: 20px; max-height: 90%; overflow-y: auto; width: 700px; border-radius: 10px; position: relative;">
+        <button onclick="closeDisaModal()" style="position: absolute; top: 10px; right: 10px;">✖</button>
+        <iframe id="disaIframe" src="popup.html" style="width: 100%; height: 600px; border: none;"></iframe>
+      </div>
+    </div>
+</body>
+</html>
